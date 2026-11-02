@@ -1,46 +1,43 @@
+
+import type { RequestOptions, Validator } from '../../types/news';
 class Loader {
-    constructor(baseLink, options) {
-        this.baseLink = baseLink;
-        this.options = options;
-    }
+    public constructor(
+    private readonly baseLink: string,
+    private readonly options: Readonly<Partial<RequestOptions>>
+) {}
 
-    getResp(
-        { endpoint, options = {} },
-        callback = () => {
-            console.error('No callback for GET response');
+public async getResp<T>(
+    endpoint: string,
+    validate: Validator<T>,
+    options: Partial<RequestOptions> = {}
+): Promise<T> {
+    const url = new URL(endpoint, this.baseLink);
+
+    const params = {
+        ...this.options,
+        ...options,
+    };
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+            url.searchParams.set(key, value);
         }
-    ) {
-        this.load('GET', endpoint, callback, options);
+    });
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
     }
 
-    errorHandler(res) {
-        if (!res.ok) {
-            if (res.status === 401 || res.status === 404)
-                console.log(`Sorry, but there is ${res.status} error: ${res.statusText}`);
-            throw Error(res.statusText);
-        }
+    const data: unknown = await response.json();
 
-        return res;
+    if (!validate(data)) {
+        throw new Error('Invalid API response');
     }
 
-    makeUrl(options, endpoint) {
-        const urlOptions = { ...this.options, ...options };
-        let url = `${this.baseLink}${endpoint}?`;
-
-        Object.keys(urlOptions).forEach((key) => {
-            url += `${key}=${urlOptions[key]}&`;
-        });
-
-        return url.slice(0, -1);
-    }
-
-    load(method, endpoint, callback, options = {}) {
-        fetch(this.makeUrl(options, endpoint), { method })
-            .then(this.errorHandler)
-            .then((res) => res.json())
-            .then((data) => callback(data))
-            .catch((err) => console.error(err));
-    }
+    return data;
+}
 }
 
 export default Loader;
