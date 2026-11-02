@@ -11,6 +11,7 @@
             <h1>News Portal</h1>
         </header>
         <main>
+            <p id="status" role="status" aria-live="polite"></p>
             <div class="sources buttons"></div>
             <div class="news"></div>
         </main>
@@ -21,9 +22,9 @@
         </footer>
 
         <template id="sourceItemTemp">
-            <div class="source__item">
+            <button type="button" class="source__item">
                 <span class="source__item-name"></span>
-            </div>
+            </button>
         </template>
 
         <template id="newsItemTemp">

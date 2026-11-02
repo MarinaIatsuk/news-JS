@@ -1,38 +1,114 @@
 import './news.css';
+import { getElement } from '../dom';
+import type { Article } from '../../../types/news';
 
 class News {
-    draw(data) {
-        const news = data.length >= 10 ? data.filter((_item, idx) => idx < 10) : data;
+public draw(data: ReadonlyArray<Readonly<Article>>): void {
+    const fragment = document.createDocumentFragment();
 
-        const fragment = document.createDocumentFragment();
-        const newsItemTemp = document.querySelector('#newsItemTemp');
+    const template = getElement(
+        document,
+        '#newsItemTemp',
+        HTMLTemplateElement
+    );
 
-        news.forEach((item, idx) => {
-            const newsClone = newsItemTemp.content.cloneNode(true);
+    const container = getElement(
+        document,
+        '.news',
+        HTMLElement
+    );
 
-            if (idx % 2) newsClone.querySelector('.news__item').classList.add('alt');
+    data.slice(0, 10).forEach((item, index) => {
+        const clone = document.importNode(template.content, true);
 
-            newsClone.querySelector('.news__meta-photo').style.backgroundImage = `url(${
-                item.urlToImage || 'img/news_placeholder.jpg'
-            })`;
-            newsClone.querySelector('.news__meta-author').textContent = item.author || item.source.name;
-            newsClone.querySelector('.news__meta-date').textContent = item.publishedAt
-                .slice(0, 10)
-                .split('-')
-                .reverse()
-                .join('-');
+        const card = getElement(
+            clone,
+            '.news__item',
+            HTMLElement
+        );
 
-            newsClone.querySelector('.news__description-title').textContent = item.title;
-            newsClone.querySelector('.news__description-source').textContent = item.source.name;
-            newsClone.querySelector('.news__description-content').textContent = item.description;
-            newsClone.querySelector('.news__read-more a').setAttribute('href', item.url);
+        const photo = getElement(
+            clone,
+            '.news__meta-photo',
+            HTMLElement
+        );
 
-            fragment.append(newsClone);
-        });
+        const link = getElement(
+            clone,
+            '.news__read-more a',
+            HTMLAnchorElement
+        );
 
-        document.querySelector('.news').innerHTML = '';
-        document.querySelector('.news').appendChild(fragment);
-    }
+        if (index % 2) {
+            card.classList.add('alt');
+        }
+
+        if (item.urlToImage) {
+            try {
+                const imageUrl = new URL(item.urlToImage);
+
+                if (
+                    imageUrl.protocol === 'https:' ||
+                    imageUrl.protocol === 'http:'
+                ) {
+                    const safeUrl = imageUrl.href.replace(/"/g, '%22');
+                    photo.style.backgroundImage = `url("${safeUrl}")`;
+                }
+            } catch {
+                // Останется запасной фон из CSS.
+            }
+        }
+
+        getElement(
+            clone,
+            '.news__meta-author',
+            HTMLElement
+        ).textContent = item.author || item.source.name;
+
+        getElement(
+            clone,
+            '.news__meta-date',
+            HTMLElement
+        ).textContent = item.publishedAt.slice(0, 10);
+
+        getElement(
+            clone,
+            '.news__description-title',
+            HTMLElement
+        ).textContent = item.title;
+
+        getElement(
+            clone,
+            '.news__description-source',
+            HTMLElement
+        ).textContent = item.source.name;
+
+        getElement(
+            clone,
+            '.news__description-content',
+            HTMLElement
+        ).textContent = item.description ?? 'No description available.';
+
+        try {
+            const articleUrl = new URL(item.url);
+
+            if (
+                articleUrl.protocol === 'http:' ||
+                articleUrl.protocol === 'https:'
+            ) {
+                link.href = articleUrl.href;
+            } else {
+                link.removeAttribute('href');
+            }
+        } catch {
+            link.removeAttribute('href');
+        }
+
+        fragment.append(clone);
+    });
+
+    container.replaceChildren(fragment);
+}
 }
 
 export default News;

@@ -1,21 +1,46 @@
 import './sources.css';
+import { getElement } from '../dom';
+import type { SourcePreview } from '../../../types/news';
 
 class Sources {
-    draw(data) {
-        const fragment = document.createDocumentFragment();
-        const sourceItemTemp = document.querySelector('#sourceItemTemp');
+public draw(data: ReadonlyArray<SourcePreview>): void {
+    const fragment = document.createDocumentFragment();
 
-        data.forEach((item) => {
-            const sourceClone = sourceItemTemp.content.cloneNode(true);
+    const template = getElement(
+        document,
+        '#sourceItemTemp',
+        HTMLTemplateElement
+    );
 
-            sourceClone.querySelector('.source__item-name').textContent = item.name;
-            sourceClone.querySelector('.source__item').setAttribute('data-source-id', item.id);
+    const container = getElement(
+        document,
+        '.sources',
+        HTMLElement
+    );
 
-            fragment.append(sourceClone);
-        });
+    data.forEach((item) => {
+        const clone = document.importNode(template.content, true);
 
-        document.querySelector('.sources').append(fragment);
-    }
+        const name = getElement(
+            clone,
+            '.source__item-name',
+            HTMLElement
+        );
+
+        const button = getElement(
+            clone,
+            '.source__item',
+            HTMLButtonElement
+        );
+
+        name.textContent = item.name;
+        button.dataset.sourceId = item.id;
+
+        fragment.append(clone);
+    });
+
+    container.replaceChildren(fragment);
+}
 }
 
 export default Sources;
