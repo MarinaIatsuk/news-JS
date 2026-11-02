@@ -11,19 +11,38 @@
             <h1>News Portal</h1>
         </header>
         <main>
+            <p id="status" role="status" aria-live="polite"></p>
             <div class="sources buttons"></div>
             <div class="news"></div>
         </main>
         <footer>
-            <p class="copyright">
-                Copyright <a href="https://newsapi.org">NewsAPI</a>
-            </p>
+            <a
+                href="https://github.com/MarinaIatsuk"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                My GitHub
+            </a>
+
+            <span>© 2026</span>
+
+            <a
+                href="https://rs.school/courses/javascript"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <img
+                    src="https://rs.school/_next/static/media/rss-logo.c19ce1b4.svg"
+                    alt="RS School JavaScript course"
+                    width="90"
+                />
+            </a>
         </footer>
 
         <template id="sourceItemTemp">
-            <div class="source__item">
+            <button type="button" class="source__item">
                 <span class="source__item-name"></span>
-            </div>
+            </button>
         </template>
 
         <template id="newsItemTemp">
