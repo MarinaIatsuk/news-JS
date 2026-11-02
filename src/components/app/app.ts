@@ -64,7 +64,7 @@ public start(): void {
         .then((data) => {
             this.view.drawSources(data);
             status.textContent =
-                'Choose a source. Demo data is static.';
+               status.textContent = 'Choose a source.';;
         })
         .catch((error: unknown) => {
             status.textContent =
